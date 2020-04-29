@@ -301,11 +301,12 @@ module.exports = function (webpackEnv) {
         ...(modules.webpackAliases || {}),
         // 文件路径别名
         '@': path.resolve(__dirname, '../src'),
-        'Base': path.resolve(__dirname, '../src/base'),
-        'Assets': path.resolve(__dirname, '../src/assets'),
-        'Components': path.resolve(__dirname, '../src/components'),
-        'Api': path.resolve(__dirname, '../src/api'),
-        'Utils': path.resolve(__dirname, '../src/utils'),
+        Base: path.resolve(__dirname, '../src/base'),
+        Assets: path.resolve(__dirname, '../src/assets'),
+        Components: path.resolve(__dirname, '../src/components'),
+        Api: path.resolve(__dirname, '../src/api'),
+        Utils: path.resolve(__dirname, '../src/utils'),
+        Application: path.resolve(__dirname, '../src/application'),
       },
       plugins: [
         // Adds support for installing with Plug'n'Play, leading to faster installs and adding
