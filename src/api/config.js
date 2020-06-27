@@ -1,4 +1,4 @@
-export const baseUrl = 'http://localhost:10086'
+export const baseUrl = 'http://localhost:3000'
 
 //歌手种类
 export const categoryTypes = [

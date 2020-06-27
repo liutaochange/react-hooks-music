@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { forceCheck } from 'react-lazyload'
+import { renderRoutes } from 'react-router-config'
 import Slider from 'Components/slider'
 import RecommendList from 'Components/list'
 import Scroll from 'Base/scroll/index'
 import Loading from 'Base/loading/index'
 import { Content } from './style'
 import * as actionTypes from './store/actionCreators'
-const Recommend = () => {
+const Recommend = (props) => {
   const dispatch = useDispatch()
   const bannerList = useSelector((state) =>
     state.getIn(['recommend', 'bannerList'])
@@ -38,6 +39,8 @@ const Recommend = () => {
         </div>
       </Scroll>
       {enterLoading ? <Loading></Loading> : null}
+      {/* 将目前所在路由的下一层子路由加以渲染 */}
+      {renderRoutes(props.route.routes)}
     </Content>
   )
 }

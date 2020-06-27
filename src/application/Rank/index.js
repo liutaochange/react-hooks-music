@@ -4,6 +4,7 @@ import { renderRoutes } from 'react-router-config'
 import { filterIndex, filterIdx } from 'Utils'
 import Loading from 'Base/loading'
 import Scroll from 'Base/scroll/index'
+import Toast from 'Base/toast/index'
 import { EnterLoading } from 'Application/Singers/style'
 import { getRankList } from './store/index'
 import { List, ListItem, SongList, Container } from './style'
@@ -28,7 +29,7 @@ function Rank(props) {
   const enterDetail = (name) => {
     const idx = filterIdx(name)
     if (idx === null) {
-      alert('暂无相关数据')
+      Toast.info('暂无相关数据')
       return
     }
   }
@@ -48,10 +49,10 @@ function Rank(props) {
   const renderRankList = (list, global) => {
     return (
       <List globalRank={global}>
-        {list.map((item) => {
+        {list.map((item, index) => {
           return (
             <ListItem
-              key={item.coverImgId}
+              key={`${item.coverImgId}_${index}`}
               tracks={item.tracks}
               onClick={() => enterDetail(item.name)}
             >
