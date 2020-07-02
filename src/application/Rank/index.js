@@ -26,12 +26,13 @@ function Rank(props) {
   let officialList = rankList.slice(0, globalStartIndex)
   let globalList = rankList.slice(globalStartIndex)
 
-  const enterDetail = (name) => {
-    const idx = filterIdx(name)
+  const enterDetail = (item) => {
+    const idx = filterIdx(item.name)
     if (idx === null) {
       Toast.info('暂无相关数据')
       return
     }
+    props.history.push(`/rank/${item.id}`)
   }
   const renderSongList = (list) => {
     return list.length ? (
@@ -54,7 +55,7 @@ function Rank(props) {
             <ListItem
               key={`${item.coverImgId}_${index}`}
               tracks={item.tracks}
-              onClick={() => enterDetail(item.name)}
+              onClick={() => enterDetail(item)}
             >
               <div className="img_wrapper">
                 <img src={item.coverImgUrl} alt="" />

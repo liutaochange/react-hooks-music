@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import LazyLoad, { forceCheck } from 'react-lazyload'
+import { renderRoutes } from 'react-router-config'
 import Horizen from 'Base/horizen-item/index'
 import Scroll from 'Base/scroll/index'
 import Loading from 'Base/loading'
@@ -17,7 +18,7 @@ import {
   refreshMoreHotSingerList,
 } from './store/actionCreators'
 
-const Singers = () => {
+const Singers = (props) => {
   const [category, setCategory] = useState('')
   const [alpha, setAlpha] = useState('')
   const dispatch = useDispatch()
@@ -89,6 +90,10 @@ const Singers = () => {
     // eslint-disable-next-line
   }, [])
 
+  const enterDetail = (id) => {
+    props.history.push(`/singers/${id}`)
+  }
+
   // 渲染函数，返回歌手列表
   const renderSingerList = () => {
     const list = singerList ? singerList.toJS() : []
@@ -96,7 +101,10 @@ const Singers = () => {
       <List>
         {list.map((item, index) => {
           return (
-            <ListItem key={item.accountId + '' + index}>
+            <ListItem
+              key={item.accountId + '' + index}
+              onClick={() => enterDetail(item.id)}
+            >
               <div className="img_wrapper">
                 <LazyLoad
                   placeholder={
@@ -151,6 +159,7 @@ const Singers = () => {
         </Scroll>
         <Loading show={enterLoading}></Loading>
       </ListContainer>
+      {renderRoutes(props.route.routes)}
     </div>
   )
 }
