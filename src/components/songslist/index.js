@@ -1,14 +1,33 @@
 import React from 'react'
+import { useDispatch } from 'react-redux'
 import { SongList, SongItem } from './style'
+import {
+  changePlayList,
+  changeCurrentIndex,
+  changeSequecePlayList,
+} from 'Application/Player/store/actionCreators'
 import { getName } from 'Utils'
 
 const SongsList = React.forwardRef((props, refs) => {
-  const { collectCount, showCollect, songs } = props
+  const { collectCount, showCollect, songs, musicAnimation } = props
+  const dispatch = useDispatch()
+  const changePlayListDispatch = (data) => {
+    dispatch(changePlayList(data))
+  }
+  const changeCurrentIndexDispatch = (data) => {
+    dispatch(changeCurrentIndex(data))
+  }
+  const changeSequecePlayListDispatch = (data) => {
+    dispatch(changeSequecePlayList(data))
+  }
   const totalCount = songs.length
   const selectItem = (e, index) => {
-    console.log(index)
+    changePlayListDispatch(songs)
+    changeSequecePlayListDispatch(songs)
+    changeCurrentIndexDispatch(index)
+    musicAnimation(e.nativeEvent.clientX, e.nativeEvent.clientY)
   }
-  let songList = (list) => {
+  const songList = (list) => {
     let res = []
     for (let i = 0; i < list.length; i++) {
       let item = list[i]

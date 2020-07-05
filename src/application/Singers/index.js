@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import LazyLoad, { forceCheck } from 'react-lazyload'
 import { renderRoutes } from 'react-router-config'
@@ -17,11 +17,17 @@ import {
   changePullDownLoading,
   refreshMoreHotSingerList,
 } from './store/actionCreators'
+import {
+  CHANGE_CATEGORY,
+  CHANGE_ALPHA,
+  CategoryDataContext,
+  Data,
+} from './data'
 
 const Singers = (props) => {
-  const [category, setCategory] = useState('')
-  const [alpha, setAlpha] = useState('')
   const dispatch = useDispatch()
+  const { data, dispatch: myDispatch } = useContext(CategoryDataContext)
+  const { category, alpha } = data.toJS()
   const singerList = useSelector((state) =>
     state.getIn(['singers', 'singerList'])
   )
@@ -36,6 +42,9 @@ const Singers = (props) => {
   )
   const pageCount = useSelector((state) =>
     state.getIn(['singers', 'pageCount'])
+  )
+  const songsCount = useSelector(
+    (state) => state.getIn(['player', 'playList']).size
   )
 
   const getHotSingerDispatch = () => {
@@ -74,13 +83,13 @@ const Singers = (props) => {
   const handlePullDown = () => {
     pullDownRefreshDispatch(category, alpha)
   }
-
   const handleUpdateAlpha = (val) => {
-    setAlpha(val)
+    myDispatch({ type: CHANGE_ALPHA, data: val })
     updateDispatch(category, val)
   }
+
   const handleUpdateCatetory = (val) => {
-    setCategory(val)
+    myDispatch({ type: CHANGE_CATEGORY, data: val })
     updateDispatch(val, alpha)
   }
   useEffect(() => {
@@ -133,32 +142,34 @@ const Singers = (props) => {
   }
   return (
     <div>
-      <NavContainer>
-        <Horizen
-          list={categoryTypes}
-          title={'分类 (默认热门):'}
-          handleClick={(val) => handleUpdateCatetory(val)}
-          oldVal={category}
-        ></Horizen>
-        <Horizen
-          list={alphaTypes}
-          title={'首字母:'}
-          handleClick={(val) => handleUpdateAlpha(val)}
-          oldVal={alpha}
-        ></Horizen>
-      </NavContainer>
-      <ListContainer>
-        <Scroll
-          pullUp={handlePullUp}
-          pullDown={handlePullDown}
-          pullUpLoading={pullUpLoading}
-          pullDownLoading={pullDownLoading}
-          onScroll={forceCheck}
-        >
-          {renderSingerList()}
-        </Scroll>
-        <Loading show={enterLoading}></Loading>
-      </ListContainer>
+      <Data>
+        <NavContainer>
+          <Horizen
+            list={categoryTypes}
+            title={'分类 (默认热门):'}
+            handleClick={(val) => handleUpdateCatetory(val)}
+            oldVal={category}
+          ></Horizen>
+          <Horizen
+            list={alphaTypes}
+            title={'首字母:'}
+            handleClick={(val) => handleUpdateAlpha(val)}
+            oldVal={alpha}
+          ></Horizen>
+        </NavContainer>
+        <ListContainer play={songsCount}>
+          <Scroll
+            pullUp={handlePullUp}
+            pullDown={handlePullDown}
+            pullUpLoading={pullUpLoading}
+            pullDownLoading={pullDownLoading}
+            onScroll={forceCheck}
+          >
+            {renderSingerList()}
+          </Scroll>
+          <Loading show={enterLoading}></Loading>
+        </ListContainer>
+      </Data>
       {renderRoutes(props.route.routes)}
     </div>
   )

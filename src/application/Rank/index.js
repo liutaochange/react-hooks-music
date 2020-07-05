@@ -12,6 +12,9 @@ function Rank(props) {
   const dispatch = useDispatch()
   const list = useSelector((state) => state.getIn(['rank', 'rankList']))
   const loading = useSelector((state) => state.getIn(['rank', 'loading']))
+  const songsCount = useSelector(
+    (state) => state.getIn(['player', 'playList']).size
+  )
   const getRankListDataDispatch = () => {
     dispatch(getRankList())
   }
@@ -72,7 +75,7 @@ function Rank(props) {
 
   let displayStyle = loading ? { display: 'none' } : { display: '' }
   return (
-    <Container>
+    <Container play={songsCount}>
       <Scroll>
         <div>
           <h1 className="official" style={displayStyle}>

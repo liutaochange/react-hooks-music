@@ -1,24 +1,33 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { Container, TopDesc, Menu, SongList, SongItem } from './style'
+import { Container, TopDesc, Menu } from './style'
 import style from 'Assets/js/global-style'
 import { CSSTransition } from 'react-transition-group'
 import Header from 'Base/header/index'
 import Scroll from 'Base/scroll/index'
 import Loading from 'Base/loading/index'
+import SongsList from 'Components/songslist'
+import MusicNote from 'Base/music-note/index'
 import { changeEnterLoading, getAlbumList } from './store/actionCreators'
-import { getName, isEmptyObject, getCount } from 'Utils'
+import { isEmptyObject, getCount } from 'Utils'
 export const HEADER_HEIGHT = 45
 
 const Album = (props) => {
   const dispatch = useDispatch()
+  const musicNoteRef = useRef()
+  const headerEl = useRef()
   const id = props.match.params.id || ''
-  const currentAlbumImmutable = useSelector((state) =>
-    state.getIn(['album', 'currentAlbum'])
+  const [showStatus, setShowStatus] = useState(true)
+  const [title, setTitle] = useState('歌单')
+  const [isMarquee, setIsMarquee] = useState(false) // 是否跑马灯
+  const currentAlbum = useSelector((state) =>
+    state.getIn(['album', 'currentAlbum']).toJS()
   )
-  let currentAlbum = currentAlbumImmutable.toJS()
   const enterLoading = useSelector((state) =>
     state.getIn(['album', 'enterLoading'])
+  )
+  const songsCount = useSelector(
+    (state) => state.getIn(['player', 'playList']).size
   )
   useEffect(() => {
     if (id) {
@@ -26,12 +35,6 @@ const Album = (props) => {
       dispatch(getAlbumList(id))
     }
   }, [id, dispatch])
-
-  const [showStatus, setShowStatus] = useState(true)
-  const [title, setTitle] = useState('歌单')
-  const [isMarquee, setIsMarquee] = useState(false) // 是否跑马灯
-
-  const headerEl = useRef()
   const handleBack = useCallback(() => {
     setShowStatus(false)
   }, [])
@@ -56,6 +59,10 @@ const Album = (props) => {
     },
     [currentAlbum]
   )
+
+  const musicAnimation = (x, y) => {
+    musicNoteRef.current.startAnimation({ x, y })
+  }
   const renderTopDesc = () => {
     return (
       <TopDesc background={currentAlbum.coverImgUrl}>
@@ -106,41 +113,6 @@ const Album = (props) => {
       </Menu>
     )
   }
-  const renderSongList = () => {
-    return (
-      <SongList>
-        <div className="first_line">
-          <div className="play_all">
-            <i className="iconfont">&#xe6e3;</i>
-            <span>
-              {' '}
-              播放全部{' '}
-              <span className="sum">(共 {currentAlbum.tracks.length} 首)</span>
-            </span>
-          </div>
-          <div className="add_list">
-            <i className="iconfont">&#xe62d;</i>
-            <span> 收藏 ({getCount(currentAlbum.subscribedCount)})</span>
-          </div>
-        </div>
-        <SongItem>
-          {currentAlbum.tracks.map((item, index) => {
-            return (
-              <li key={index}>
-                <span className="index">{index + 1}</span>
-                <div className="info">
-                  <span>{item.name}</span>
-                  <span>
-                    {getName(item.ar)} - {item.al.name}
-                  </span>
-                </div>
-              </li>
-            )
-          })}
-        </SongItem>
-      </SongList>
-    )
-  }
   return (
     <CSSTransition
       in={showStatus}
@@ -150,7 +122,7 @@ const Album = (props) => {
       unmountOnExit
       onExited={props.history.goBack}
     >
-      <Container>
+      <Container play={songsCount}>
         <Header
           title={title}
           ref={headerEl}
@@ -162,11 +134,18 @@ const Album = (props) => {
             <div>
               {renderTopDesc()}
               {renderMenu()}
-              {renderSongList()}
+              <SongsList
+                songs={currentAlbum.tracks}
+                collectCount={currentAlbum.subscribedCount}
+                showCollect={true}
+                showBackground={true}
+                musicAnimation={musicAnimation}
+              ></SongsList>
             </div>
           </Scroll>
         ) : null}
         {enterLoading ? <Loading></Loading> : null}
+        <MusicNote ref={musicNoteRef}></MusicNote>
       </Container>
     </CSSTransition>
   )

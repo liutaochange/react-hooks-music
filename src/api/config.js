@@ -206,3 +206,6 @@ export const playMode = {
   loop: 1,
   random: 2,
 }
+
+//顶部的高度
+export const HEADER_HEIGHT = 45

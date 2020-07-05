@@ -7,6 +7,7 @@ import Rank from '../application/Rank'
 import Album from '../application/Album'
 import Singer from '../application/Singer'
 
+
 export default [
   {
     path: '/',

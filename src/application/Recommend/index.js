@@ -19,6 +19,9 @@ const Recommend = (props) => {
   const enterLoading = useSelector((state) =>
     state.getIn(['recommend', 'enterLoading'])
   )
+  const songsCount = useSelector(
+    (state) => state.getIn(['player', 'playList']).size
+  )
   useEffect(() => {
     if (!bannerList.size) {
       dispatch(actionTypes.getBannerList())
@@ -31,7 +34,7 @@ const Recommend = (props) => {
   const bannerListJS = bannerList ? bannerList.toJS() : []
   const recommendListJS = recommendList ? recommendList.toJS() : []
   return (
-    <Content>
+    <Content play={songsCount}>
       <Scroll onScroll={forceCheck}>
         <div>
           <Slider bannerList={bannerListJS}></Slider>
