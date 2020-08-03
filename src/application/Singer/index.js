@@ -27,9 +27,11 @@ const Singer = (props) => {
   // 图片初始高度
   const initialHeight = useRef(0)
   const dispatch = useDispatch()
-  const artist = useSelector((state) => state.getIn(['singerInfo', 'artist']))
+  const artist = useSelector((state) =>
+    state.getIn(['singerInfo', 'artist']).toJS()
+  )
   const songs = useSelector((state) =>
-    state.getIn(['singerInfo', 'songsOfArtist'])
+    state.getIn(['singerInfo', 'songsOfArtist']).toJS()
   )
   const loading = useSelector((state) => state.getIn(['singerInfo', 'loading']))
   const songsCount = useSelector(
@@ -41,20 +43,23 @@ const Singer = (props) => {
     dispatch(getSingerInfo(id))
   }
   // 往上偏移的尺寸，露出圆角
-  const OFFSET = 5
+  const OFFSET = 10
   useEffect(() => {
     let h = imageWrapper.current.offsetHeight
-    songScrollWrapper.current.style.top = `${h - OFFSET} px`
+    songScrollWrapper.current.style.top = `${h - OFFSET}px`
     initialHeight.current = h
     // 把遮罩先放在下面，以裹住歌曲列表
-    layer.current.style.top = `${h - OFFSET} px`
+    layer.current.style.top = `${h - OFFSET}px`
     songScroll.current.refresh()
+  })
+
+  useEffect(() => {
     const id = props.match.params.id
     getSingerDataDispatch(id)
     //eslint-disable-next-line
   }, [])
 
-  const handleScroll = useCallback((pos) => {
+  const handleScroll = (pos) => {
     let height = initialHeight.current
     const newY = pos.y
     const imageDOM = imageWrapper.current
@@ -65,7 +70,8 @@ const Singer = (props) => {
 
     //指的是滑动距离占图片高度的百分比
     const percent = Math.abs(newY / height)
-
+    //说明: 在歌手页的布局中，歌单列表其实是没有自己的背景的，layerDOM其实是起一个遮罩的作用，给歌单内容提供白色背景
+    //因此在处理的过程中，随着内容的滚动，遮罩也跟着移动
     if (newY > 0) {
       imageDOM.style['transform'] = `scale(${1 + percent})`
       buttonDOM.style['transform'] = `translate3d(0, ${newY}px, 0)`
@@ -91,7 +97,7 @@ const Singer = (props) => {
       imageDOM.style.paddingTop = 0
       imageDOM.style.zIndex = 99
     }
-  }, [])
+  }
 
   const setShowStatusFalse = useCallback(() => {
     setShowStatus(false)
@@ -120,7 +126,7 @@ const Singer = (props) => {
         </ImgWrapper>
         <CollectButton ref={collectButton}>
           <i className="iconfont">&#xe62d;</i>
-          <span className="text"> 收藏 </span>
+          <span className="text">收藏</span>
         </CollectButton>
         <BgLayer ref={layer}></BgLayer>
         <SongListWrapper ref={songScrollWrapper}>

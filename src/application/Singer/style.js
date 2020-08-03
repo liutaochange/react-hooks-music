@@ -14,31 +14,50 @@ export const Container = styled.div`
   transform-origin: right bottom;
   &.fly-enter,
   &.fly-appear {
-    transform: rotateZ (30deg) translate3d (100%, 0, 0);
+    transform: rotateZ(30deg) translate3d(100%, 0, 0);
   }
   &.fly-enter-active,
   &.fly-appear-active {
     transition: transform 0.3s;
-    transform: rotateZ (0deg) translate3d (0, 0, 0);
+    transform: rotateZ(0deg) translate3d(0, 0, 0);
   }
   &.fly-exit {
-    transform: rotateZ (0deg) translate3d (0, 0, 0);
+    transform: rotateZ(0deg) translate3d(0, 0, 0);
   }
   &.fly-exit-active {
     transition: transform 0.3s;
-    transform: rotateZ (30deg) translate3d (100%, 0, 0);
+    transform: rotateZ(30deg) translate3d(100%, 0, 0);
   }
 `
 
+export const ImgWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-top: 75%;
+  transform-origin: top;
+  background: url(${(props) => props.bgUrl});
+  background-size: cover;
+  z-index: 50;
+  .filter {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* : blur(20px); */
+    background: rgba(7, 17, 27, 0.3);
+  }
+`
 export const CollectButton = styled.div`
-  position: absolute;
+  position: fixed;
   left: 0;
   right: 0;
   margin: auto;
   box-sizing: border-box;
   width: 120px;
   height: 40px;
-  margin-top: -55px;
+  margin-top: -65px;
   z-index: 50;
   background: ${style['theme-color']};
   color: ${style['font-color-light']};
@@ -59,30 +78,12 @@ export const CollectButton = styled.div`
   }
 `
 
-export const ImgWrapper = styled.div`
-  position: relative;
-  width: 100%;
-  height: 0;
-  padding-top: 75%;
-  transform-origin: top;
-  background: url (${(props) => props.bgUrl});
-  background-size: cover;
-  z-index: 50;
-  .filter {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba (7, 17, 27, 0.3);
-  }
-`
 export const SongListWrapper = styled.div`
   position: absolute;
   z-index: 50;
   top: 0;
   left: 0;
-  bottom: 0;
+  bottom: ${(props) => (props.play ? '60px' : 0)};
   right: 0;
   > div {
     position: absolute;
@@ -91,7 +92,6 @@ export const SongListWrapper = styled.div`
     overflow: visible;
   }
 `
-
 export const BgLayer = styled.div`
   position: absolute;
   top: 0;
