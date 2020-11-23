@@ -110,11 +110,11 @@ export const getSongUrl = (id) => {
   return `https://music.163.com/song/media/outer/url?id=${id}.mp3`
 }
 
-function getRandomInt(min, max) {
+export const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 // 随机算法
-export function shuffle(arr) {
+export const shuffle = (arr) => {
   let new_arr = []
   arr.forEach((item) => {
     new_arr.push(item)

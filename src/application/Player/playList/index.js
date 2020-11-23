@@ -10,7 +10,10 @@ import { CSSTransition } from 'react-transition-group'
 import { prefixStyle, getName, shuffle, findIndex } from 'Utils'
 import {
   changeShowPlayList,
+  changeSequecePlayList,
   changeCurrentIndex,
+  changeCurrentSong,
+  changePlayingState,
   changePlayMode,
   changePlayList,
   deleteSong,

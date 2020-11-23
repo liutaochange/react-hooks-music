@@ -47,9 +47,6 @@ const Player = (props) => {
   const currentSong = useSelector((state) =>
     state.getIn(['player', 'currentSong'])
   )
-  const showPlayList = useSelector((state) =>
-    state.getIn(['player', 'showPlayList'])
-  )
   const mode = useSelector((state) => state.getIn(['player', 'mode']))
   const currentIndex = useSelector((state) =>
     state.getIn(['player', 'currentIndex'])
@@ -215,6 +212,7 @@ const Player = (props) => {
     getLyric(current.id)
     setCurrentTime(0) // 从头开始播放
     setDuration((current.dt / 1000) | 0) // 时长
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playList, currentIndex])
   useEffect(() => {
     playing ? audioRef.current.play() : audioRef.current.pause()
@@ -224,8 +222,6 @@ const Player = (props) => {
     setModeText('播放出错')
     toastRef.current.show()
   }
-  console.log(isEmptyObject(currentSong));
-  console.log(currentSong);
   return (
     <div>
       {isEmptyObject(currentSong) ? null : (

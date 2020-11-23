@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useCallback } from 'react'
 import { getName, formatPlayTime } from 'Utils'
 import animations from 'create-keyframe-animation'
 import { CSSTransition } from 'react-transition-group'
@@ -134,6 +134,11 @@ const NormalPlayer = (props) => {
       setCurrentState('')
     }
   }
+
+  const clickPlayingCB = useCallback((e) => {
+    clickPlaying(e, !playing);
+  }, [clickPlaying, playing]);
+
   useEffect(() => {
     if (!lyricScrollRef.current) return
     let bScroll = lyricScrollRef.current.getBScroll()
@@ -255,7 +260,13 @@ const NormalPlayer = (props) => {
               <i className="iconfont">&#xe6e1;</i>
             </div>
             <div className="icon i-center">
-              <i className="iconfont">&#xe723;</i>
+            <i
+                className="iconfont"
+                onClick={clickPlayingCB}
+                dangerouslySetInnerHTML={{
+                  __html: playing ? "&#xe723;" : "&#xe731;"
+                }}
+              ></i>
             </div>
             <div className="icon i-right" onClick={handleNext}>
               <i className="iconfont">&#xe718;</i>

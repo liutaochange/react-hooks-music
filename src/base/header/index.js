@@ -32,6 +32,7 @@ const Header = React.forwardRef((props, ref) => {
         &#xe655;
       </i>
       {isMarquee ? (
+        // eslint-disable-next-line jsx-a11y/no-distracting-elements
         <marquee>
           <h1>{title}</h1>
         </marquee>
