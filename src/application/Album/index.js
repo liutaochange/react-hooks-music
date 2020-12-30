@@ -8,7 +8,11 @@ import Scroll from 'Base/scroll/index'
 import Loading from 'Base/loading/index'
 import SongsList from 'Components/songslist'
 import MusicNote from 'Base/music-note/index'
-import { changeEnterLoading, getAlbumList } from './store/actionCreators'
+import {
+  changeEnterLoading,
+  getAlbumList,
+  changePullUpLoading,
+} from './store/actionCreators'
 import { isEmptyObject, getCount } from 'Utils'
 export const HEADER_HEIGHT = 45
 
@@ -23,6 +27,9 @@ const Album = (props) => {
   const currentAlbum = useSelector((state) =>
     state.getIn(['album', 'currentAlbum']).toJS()
   )
+  const pullUpLoading = useSelector((state) =>
+    state.getIn(['album', 'pullUpLoading'])
+  )
   const enterLoading = useSelector((state) =>
     state.getIn(['album', 'enterLoading'])
   )
@@ -35,6 +42,12 @@ const Album = (props) => {
       dispatch(getAlbumList(id))
     }
   }, [id, dispatch])
+
+  const handlePullUp = () => {
+    dispatch(changePullUpLoading(true))
+    dispatch(changePullUpLoading(false))
+  }
+
   const handleBack = useCallback(() => {
     setShowStatus(false)
   }, [])
@@ -130,7 +143,12 @@ const Album = (props) => {
           isMarquee={isMarquee}
         ></Header>
         {!isEmptyObject(currentAlbum) ? (
-          <Scroll bounceTop={false} onScroll={handleScroll}>
+          <Scroll
+            bounceTop={false}
+            onScroll={handleScroll}
+            pullUp={handlePullUp}
+            pullUpLoading={pullUpLoading}
+          >
             <div>
               {renderTopDesc()}
               {renderMenu()}
@@ -140,6 +158,7 @@ const Album = (props) => {
                 showCollect={true}
                 showBackground={true}
                 musicAnimation={musicAnimation}
+                loading={pullUpLoading}
               ></SongsList>
             </div>
           </Scroll>

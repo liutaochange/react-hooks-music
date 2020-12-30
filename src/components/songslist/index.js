@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { SongList, SongItem } from './style'
+import { ONE_PAGE_COUNT } from 'Api/config'
 import {
   changePlayList,
   changeCurrentIndex,
@@ -9,7 +10,14 @@ import {
 import { getName } from 'Utils'
 
 const SongsList = React.forwardRef((props, refs) => {
-  const { collectCount, showCollect, songs, musicAnimation } = props
+  const {
+    collectCount,
+    showCollect,
+    songs,
+    musicAnimation,
+    loading = false,
+    usePageSplit,
+  } = props
   const dispatch = useDispatch()
   const changePlayListDispatch = (data) => {
     dispatch(changePlayList(data))
@@ -20,7 +28,15 @@ const SongsList = React.forwardRef((props, refs) => {
   const changeSequecePlayListDispatch = (data) => {
     dispatch(changeSequecePlayList(data))
   }
+  const [startIndex, setStartIndex] = useState(0)
   const totalCount = songs.length
+
+  useEffect(() => {
+    if (!loading) return
+    if (startIndex + 1 + ONE_PAGE_COUNT >= totalCount) return
+    setStartIndex(startIndex + ONE_PAGE_COUNT)
+  }, [loading, startIndex, totalCount])
+
   const selectItem = (e, index) => {
     changePlayListDispatch(songs)
     changeSequecePlayListDispatch(songs)
@@ -29,7 +45,10 @@ const SongsList = React.forwardRef((props, refs) => {
   }
   const songList = (list) => {
     let res = []
-    for (let i = 0; i < list.length; i++) {
+    // 判断页数是否超过总数
+    let end = usePageSplit ? startIndex + ONE_PAGE_COUNT : list.length
+    for (let i = 0; i < end; i++) {
+      if (i >= list.length) break
       let item = list[i]
       res.push(
         <li key={item.id} onClick={(e) => selectItem(e, i)}>
@@ -61,8 +80,7 @@ const SongsList = React.forwardRef((props, refs) => {
         <div className="play_all" onClick={(e) => selectItem(e, 0)}>
           <i className="iconfont">&#xe6e3;</i>
           <span>
-            {' '}
-            播放全部 <span className="sum">(共 {totalCount} 首)</span>
+            播放全部 <span className="sum">(共{totalCount}首)</span>
           </span>
         </div>
         {showCollect ? collect(collectCount) : null}

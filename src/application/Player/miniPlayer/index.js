@@ -1,27 +1,28 @@
-import React, { useRef } from 'react'
-import { getName } from 'Utils'
+import React, { useRef, useCallback } from 'react'
 import { CSSTransition } from 'react-transition-group'
 import ProgressCircle from 'Base/progress-circle'
+import { getName } from 'Utils'
 import { MiniPlayerContainer } from './style'
 
 function MiniPlayer(props) {
-  const {
-    song,
-    fullScreen,
-    toggleFullScreen,
-    playing,
-    percent,
-    clickPlaying,
-    togglePlayList,
-  } = props
+  const { full, song, playing, percent } = props
+  const { clickPlaying, setFullScreen, togglePlayList } = props
+
   const miniPlayerRef = useRef()
-  const handleTogglePlayList = (e) => {
-    e.stopPropagation()
-    togglePlayList(true)
-  }
+  const miniWrapperRef = useRef()
+  const miniImageRef = useRef()
+
+  const handleTogglePlayList = useCallback(
+    (e) => {
+      togglePlayList(true)
+      e.stopPropagation()
+    },
+    [togglePlayList]
+  )
+
   return (
     <CSSTransition
-      in={!fullScreen}
+      in={!full}
       timeout={400}
       classNames="mini"
       onEnter={() => {
@@ -33,12 +34,13 @@ function MiniPlayer(props) {
     >
       <MiniPlayerContainer
         ref={miniPlayerRef}
-        onClick={() => toggleFullScreen(true)}
+        onClick={() => setFullScreen(true)}
       >
         <div className="icon">
-          <div className="imgWrapper">
+          <div className="imgWrapper" ref={miniWrapperRef}>
             <img
               className={`play ${playing ? '' : 'pause'}`}
+              ref={miniImageRef}
               src={song.al.picUrl}
               width="40"
               height="40"

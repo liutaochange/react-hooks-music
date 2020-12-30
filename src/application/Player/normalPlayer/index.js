@@ -1,50 +1,81 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react'
-import { getName, formatPlayTime } from 'Utils'
-import animations from 'create-keyframe-animation'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { CSSTransition } from 'react-transition-group'
+import animations from 'create-keyframe-animation'
+import ProgressBar from 'Base/progress-bar/index'
+import Scroll from 'Base/scroll/index'
+import { playMode, list } from 'Api/config'
+import { prefixStyle, formatPlayTime, getName } from 'Utils'
 import {
   NormalPlayerContainer,
   Top,
   Middle,
   Bottom,
+  ProgressWrapper,
   Operators,
   CDWrapper,
-  ProgressWrapper,
   LyricContainer,
   LyricWrapper,
+  List,
+  ListItem,
 } from './style'
-import { prefixStyle } from 'Utils'
-import ProgressBar from 'Base/progress-bar/index'
-import Scroll from 'Base/scroll/index'
-import { playMode } from 'Api/config'
 
-const NormalPlayer = (props) => {
+function NormalPlayer(props) {
   const {
+    full,
     song,
-    fullScreen,
+    mode,
     playing,
     percent,
-    duration,
     currentTime,
-    toggleFullScreen,
-    clickPlaying,
-    onProgressChange,
-    handlePrev,
-    handleNext,
-    mode,
-    changeMode,
-    togglePlayList,
+    duration,
     currentLineNum,
     currentPlayingLyric,
     currentLyric,
+    speed,
   } = props
-  const normalPlayerRef = useRef()
-  const cdWrapperRef = useRef()
-  const [currentState, setCurrentState] = useState('')
-  const lyricScrollRef = useRef()
-  const lyricLineRefs = useRef([])
+  const {
+    changeMode,
+    handlePrev,
+    handleNext,
+    onProgressChange,
+    clickPlaying,
+    toggleFullScreenDispatch,
+    togglePlayListDispatch,
+    clickSpeed,
+  } = props
+  //处理transform的浏览器兼容问题
   const transform = prefixStyle('transform')
-  // 计算偏移的辅助函数
+
+  const normalPlayerRef = useRef()
+  const lyricScrollRef = useRef()
+
+  const lyricLineRefs = useRef([])
+  const cdWrapperRef = useRef()
+  const [currentState, setCurrentState] = useState(0)
+
+  useEffect(() => {
+    if (!lyricScrollRef.current) return
+    let bScroll = lyricScrollRef.current.getBScroll()
+    if (currentLineNum > 5) {
+      let lineEl = lyricLineRefs.current[currentLineNum - 5].current
+      bScroll.scrollToElement(lineEl, 1000)
+    } else {
+      bScroll.scrollTo(0, 0, 1000)
+    }
+  }, [currentLineNum])
+
+  const getPlayMode = () => {
+    let content
+    if (mode === playMode.sequence) {
+      content = '&#xe625;'
+    } else if (mode === playMode.loop) {
+      content = '&#xe653;'
+    } else {
+      content = '&#xe61b;'
+    }
+    return content
+  }
+
   const _getPosAndScale = () => {
     const targetWidth = 40
     const paddingLeft = 40
@@ -62,19 +93,18 @@ const NormalPlayer = (props) => {
     }
   }
 
-  // 启用帧动画
   const enter = () => {
     normalPlayerRef.current.style.display = 'block'
-    const { x, y, scale } = _getPosAndScale() // 获取 miniPlayer 图片中心相对 normalPlayer 唱片中心的偏移
+    const { x, y, scale } = _getPosAndScale()
     let animation = {
       0: {
-        transform: `translate3d (${x} px,${y} px,0) scale (${scale})`,
+        transform: `translate3d(${x}px,${y}px,0) scale(${scale})`,
       },
       60: {
-        transform: `translate3d (0, 0, 0) scale (1.1)`,
+        transform: `translate3d(0, 0, 0) scale(1.1)`,
       },
       100: {
-        transform: `translate3d (0, 0, 0) scale (1)`,
+        transform: `translate3d(0, 0, 0) scale(1)`,
       },
     }
     animations.registerAnimation({
@@ -89,7 +119,6 @@ const NormalPlayer = (props) => {
   }
 
   const afterEnter = () => {
-    // 进入后解绑帧动画
     const cdWrapperDom = cdWrapperRef.current
     animations.unregisterAnimation('move')
     cdWrapperDom.style.animation = ''
@@ -102,7 +131,7 @@ const NormalPlayer = (props) => {
     const { x, y, scale } = _getPosAndScale()
     cdWrapperDom.style[
       transform
-    ] = `translate3d (${x} px, ${y} px, 0) scale (${scale})`
+    ] = `translate3d(${x}px, ${y}px, 0) scale(${scale})`
   }
 
   const afterLeave = () => {
@@ -110,52 +139,31 @@ const NormalPlayer = (props) => {
     const cdWrapperDom = cdWrapperRef.current
     cdWrapperDom.style.transition = ''
     cdWrapperDom.style[transform] = ''
-    // 一定要注意现在要把 normalPlayer 这个 DOM 给隐藏掉，因为 CSSTransition 的工作只是把动画执行一遍
-    // 不置为 none 现在全屏播放器页面还是存在
     normalPlayerRef.current.style.display = 'none'
     setCurrentState('')
   }
 
-  const getPlayMode = () => {
-    let content
-    if (mode === playMode.sequence) {
-      content = '&#xe625;'
-    } else if (mode === playMode.loop) {
-      content = '&#xe653;'
-    } else {
-      content = '&#xe61b;'
-    }
-    return content
-  }
   const toggleCurrentState = () => {
+    let nextState = ''
     if (currentState !== 'lyric') {
-      setCurrentState('lyric')
+      nextState = 'lyric'
     } else {
-      setCurrentState('')
+      nextState = ''
     }
+    setCurrentState(nextState)
   }
 
-  const clickPlayingCB = useCallback((e) => {
-    clickPlaying(e, !playing);
-  }, [clickPlaying, playing]);
-
-  useEffect(() => {
-    if (!lyricScrollRef.current) return
-    let bScroll = lyricScrollRef.current.getBScroll()
-    if (currentLineNum > 5) {
-      // 保持当前歌词在第 5 条的位置
-      let lineEl = lyricLineRefs.current[currentLineNum - 5].current
-      bScroll.scrollToElement(lineEl, 1000)
-    } else {
-      // 当前歌词行数 <=5, 直接滚动到最顶端
-      bScroll.scrollTo(0, 0, 1000)
-    }
-  }, [currentLineNum])
+  const clickPlayingCB = useCallback(
+    (e) => {
+      clickPlaying(e, !playing)
+    },
+    [clickPlaying, playing]
+  )
 
   return (
     <CSSTransition
       classNames="normal"
-      in={fullScreen}
+      in={full}
       timeout={400}
       mountOnEnter
       onEnter={enter}
@@ -174,11 +182,13 @@ const NormalPlayer = (props) => {
         </div>
         <div className="background layer"></div>
         <Top className="top">
-          <div className="back" onClick={() => toggleFullScreen(false)}>
+          <div className="back" onClick={() => toggleFullScreenDispatch(false)}>
             <i className="iconfont icon-back">&#xe662;</i>
           </div>
-          <h1 className="title">{song.name}</h1>
-          <h1 className="subtitle">{getName(song.ar)}</h1>
+          <div className="text">
+            <h1 className="title">{song.name}</h1>
+            <h1 className="subtitle">{getName(song.ar)}</h1>
+          </div>
         </Top>
         <Middle ref={cdWrapperRef} onClick={toggleCurrentState}>
           <CSSTransition
@@ -190,14 +200,17 @@ const NormalPlayer = (props) => {
               style={{
                 visibility: currentState !== 'lyric' ? 'visible' : 'hidden',
               }}
+              playing={playing}
             >
+              <div className={`needle ${playing ? '' : 'pause'}`}></div>
               <div className="cd">
                 <img
-                  className="image play"
+                  className={`image play ${playing ? '' : 'pause'}`}
                   src={song.al.picUrl + '?param=400x400'}
                   alt=""
                 />
               </div>
+              {/* <CD playing={playing} image={song.al.picUrl + "?param=300x300"}></CD> */}
               <p className="playing_lyric">{currentPlayingLyric}</p>
             </CDWrapper>
           </CSSTransition>
@@ -216,7 +229,6 @@ const NormalPlayer = (props) => {
                 >
                   {currentLyric ? (
                     currentLyric.lines.map((item, index) => {
-                      // 拿到每一行歌词的 DOM 对象，后面滚动歌词需要！
                       lyricLineRefs.current[index] = React.createRef()
                       return (
                         <p
@@ -231,7 +243,7 @@ const NormalPlayer = (props) => {
                       )
                     })
                   ) : (
-                    <p className="text pure"> 纯音乐，请欣赏。</p>
+                    <p className="text pure">纯音乐，请欣赏。</p>
                   )}
                 </LyricWrapper>
               </Scroll>
@@ -239,6 +251,20 @@ const NormalPlayer = (props) => {
           </CSSTransition>
         </Middle>
         <Bottom className="bottom">
+          <List>
+            <span>倍速听歌</span>
+            {list.map((item) => {
+              return (
+                <ListItem
+                  key={item.key}
+                  className={`${speed === item.key ? 'selected' : ''}`}
+                  onClick={() => clickSpeed(item.key)}
+                >
+                  {item.name}
+                </ListItem>
+              )
+            })}
+          </List>
           <ProgressWrapper>
             <span className="time time-l">{formatPlayTime(currentTime)}</span>
             <div className="progress-bar-wrapper">
@@ -260,11 +286,11 @@ const NormalPlayer = (props) => {
               <i className="iconfont">&#xe6e1;</i>
             </div>
             <div className="icon i-center">
-            <i
+              <i
                 className="iconfont"
                 onClick={clickPlayingCB}
                 dangerouslySetInnerHTML={{
-                  __html: playing ? "&#xe723;" : "&#xe731;"
+                  __html: playing ? '&#xe723;' : '&#xe731;',
                 }}
               ></i>
             </div>
@@ -273,10 +299,7 @@ const NormalPlayer = (props) => {
             </div>
             <div
               className="icon i-right"
-              onClick={(e) => {
-                e.stopPropagation()
-                togglePlayList(true)
-              }}
+              onClick={() => togglePlayListDispatch(true)}
             >
               <i className="iconfont">&#xe640;</i>
             </div>
@@ -286,4 +309,5 @@ const NormalPlayer = (props) => {
     </CSSTransition>
   )
 }
+
 export default React.memo(NormalPlayer)
